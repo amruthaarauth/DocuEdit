@@ -1,0 +1,122 @@
+
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="linkers/createDocument.js"></script>
+    <style>
+        .leftside, .rightside {
+<!--            height: 50vh;-->
+            width: 100%;
+        }
+
+        .leftside {
+<!--            background: lightgray;-->
+        }
+
+        .rightside{
+<!--            background: blue;-->
+        }
+
+        input{
+            border: 1px solid gray;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .note{
+           border: 1px solid gray;
+           margin-bottom: 10px;
+           border-radius: 4px;
+           padding: 10px
+        }
+
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 200px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+  <br>
+  <div class="container">
+    <button class="btn btn-info"><a style="color:white" href="gui.html">< Back</a></button>
+
+    <div class="jumbotron">
+      <h1>Scotia DocEdit</h1>
+      <div style="display: flex">
+          <p style="margin-right: 10px">Powered by Python</p>
+          <p id="version"></p>
+      </div>
+
+    </div>
+    <br>
+    <div class="note">
+        <p style="align-text: center">Please make sure you have word template to edit is saved in directory C:\Document_Template. </p>
+        <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: baseline;">
+            <p style="padding-right: 10px;">Click to create directory if it does not exists</p>
+            <button class="btn btn-success" onclick="create_directory()">Create</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="leftside">
+                    <label>Enter Country Name</label>
+                    <br />
+                    <label >Enter Model</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="rightside">
+                    <input id="country" type="text" placeholder="Country"/>
+                    <br />
+                    <input id="model" type="text" placeholder="Model"/>
+            </div>
+        </div>
+    </div>
+    <br />
+    <button class="btn btn-success" onclick="create_document()" style="display: block">Generate!</button>
+
+  </div>
+  <script>
+    const { ipcRenderer } = require('electron');
+    const version = document.getElementById('version');
+    const notification = document.getElementById('notification');
+    const message = document.getElementById('message');
+    const restartButton = document.getElementById('restart-button');
+
+    ipcRenderer.send('app_version');
+    ipcRenderer.on('app_version', (event, arg) => {
+      ipcRenderer.removeAllListeners('app_version');
+      version.innerText = 'v' + arg.version;
+    });
+
+    ipcRenderer.on('update_available', () => {
+      ipcRenderer.removeAllListeners('update_available');
+      message.innerText = 'A new update is available. Downloading now...';
+      notification.classList.remove('hidden');
+    });
+    ipcRenderer.on('update_downloaded', () => {
+      ipcRenderer.removeAllListeners('update_downloaded');
+      message.innerText = 'Update Downloaded. It will be installed on restart. Restart now?';
+      restartButton.classList.remove('hidden');
+      notification.classList.remove('hidden');
+    });
+
+    function closeNotification() {
+      notification.classList.add('hidden');
+    }
+    function restartApp() {
+      ipcRenderer.send('restart_app');
+    }
+  </script>
+<body>
